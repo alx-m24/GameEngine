@@ -14,8 +14,6 @@ struct Texture
 	std::string path;
 };
 
-unsigned int loadTexture(char const* path);
+unsigned int loadTexture(std::string path);
 unsigned int TextureFromFile(const char* path, const std::string& directory);
-
-extern std::unordered_map<std::string, unsigned int> textures;
 #endif // TEXTURE_H

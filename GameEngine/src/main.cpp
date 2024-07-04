@@ -10,39 +10,14 @@
 #include <filesystem>
 // My headers
 #include "Headers/Resources/Shaders/Shader.hpp"
-#include "Headers/Camera/Camera.hpp"
 #include "Headers/Resources/Textures/Textures.hpp"
+#include "Headers/Resources/Resources.hpp"
 #include "Headers/Resources/Model.hpp"
+#include "Headers/Camera/Camera.hpp"
+#include "Headers/IO/Input.hpp"
 
-#pragma region CallBacks
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow* window);
-#pragma endregion
-
-#pragma region Variables
-// Path
-const std::string PATH = std::filesystem::current_path().string();
-
-// settings
-unsigned int SCR_WIDTH = 1000;
-unsigned int SCR_HEIGHT = 600;
-
-// Wireframe
-bool wireFrame = false;
-bool lastF4;
-
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
-
-// Textures
-std::unordered_map<std::string, unsigned int> textures;
-std::unordered_map<std::string, Model> models;
-#pragma endregion
+using namespace IO;
+using namespace Resources;
 
 int main() {
 #pragma region init
@@ -50,8 +25,11 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	const std::string PATH = std::filesystem::current_path().string();
 #pragma endregion
 
+#pragma region Window and Context
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Lighting", NULL, NULL);
 	if (window == nullptr) {
 		std::cerr << "Failed to create window" << std::endl;
@@ -64,23 +42,26 @@ int main() {
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
-	stbi_set_flip_vertically_on_load(true);
+	
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cerr << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+#pragma endregion
+	
+#pragma region OpenGL Parameters
+	stbi_set_flip_vertically_on_load(true);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
-
-	std::cout << PATH << std::endl;
+#pragma endregion
 
 	// Triangle
-	Shader lightCube("C:\\Users\\alexa\\OneDrive\\Coding\\C++\\OpenGL\\Advanced\\Advanced\\src\\Headers\\Shaders\\src\\lightCube.vert", "C:\\Users\\alexa\\OneDrive\\Coding\\C++\\OpenGL\\Advanced\\Advanced\\src\\Headers\\Shaders\\src\\lightCube.frag");
-	Shader lightingShader("C:\\Users\\alexa\\OneDrive\\Coding\\C++\\OpenGL\\Models\\Models\\src\\Headers\\Shaders\\src\\LightEnvironment.vert", "C:\\Users\\alexa\\OneDrive\\Coding\\C++\\OpenGL\\Advanced\\Advanced\\src\\Headers\\Shaders\\src\\LightEnvironment.frag");
+	shaders["lightCube"] = Shader(PATH + "\\res\\Shaders\\lightCube.vert", PATH + "\\res\\Shaders\\lightCube.frag");
+	shaders["lighting"] = Shader(PATH + "\\res\\Shaders\\LightEnvironment.vert", PATH + "\\res\\Shaders\\LightEnvironment.frag");
 
 	float vertices[] = {
 		// Position				// Normal				// TexCoords
@@ -181,10 +162,12 @@ int main() {
 	glEnableVertexAttribArray(0);
 
 	// Textures
-	textures["diffuseMap"] = loadTexture("C:\\Users\\alexa\\OneDrive\\Coding\\C++\\OpenGL\\Advanced\\Advanced\\src\\Headers\\Textures\\src\\container2.png");
-	textures["specularMap"] = loadTexture("C:\\Users\\alexa\\OneDrive\\Coding\\C++\\OpenGL\\Advanced\\Advanced\\src\\Headers\\Textures\\src\\container2_specular.png");
+	textures["diffuseMap"] = loadTexture(PATH + "\\res\\Textures\\container2.png");
+	textures["specularMap"] = loadTexture(PATH + "\\res\\Textures\\container2_specular.png");
 
-	models["BackBag"] = Model("C:\\Users\\alexa\\OneDrive\\Coding\\C++\\OpenGL\\Advanced\\Advanced\\src\\Headers\\Models\\BackBag\\backpack.obj");
+	models["BackBag"] = Model(PATH + "\\res\\Models\\BackBag\\backpack.obj");
+
+	Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 	float time = glfwGetTime();
 	float lastTime = time;
@@ -193,13 +176,21 @@ int main() {
 		float dt = time - lastTime;
 		lastTime = time;
 
-		processInput(window);
+		glfwPollEvents();
 
-		camera.update(window, dt);
+		UpdateParameters cameraUpdateParams = {
+			xoffset,
+			yoffset,
+			yScrollOffset
+		};
+		camera.update(window,cameraUpdateParams, dt);
+
+		processInput(window);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		Shader& lightingShader = shaders["lighting"];
 		lightingShader.use();
 		lightingShader.setVec3("viewPos", camera.Position);
 
@@ -301,6 +292,7 @@ int main() {
 		lightingShader.setMat4("model", model);
 		models["BackBag"].draw(lightingShader);
 
+		Shader& lightCube = shaders["lightCube"];
 		lightCube.use();
 		lightCube.setMat4("view", view);
 		lightCube.setMat4("projection", projection);
@@ -316,7 +308,6 @@ int main() {
 		}
 
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteBuffers(1, &VBO);
@@ -325,54 +316,3 @@ int main() {
 
 	return EXIT_SUCCESS;
 }
-
-#pragma region InputFunctions
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
-
-	SCR_WIDTH = width;
-	SCR_HEIGHT = height;
-}
-
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
-	float xpos = static_cast<float>(xposIn);
-	float ypos = static_cast<float>(yposIn);
-
-	if (firstMouse)
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos;
-
-	lastX = xpos;
-	lastY = ypos;
-
-	camera.rotate(xoffset, yoffset);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	camera.zoom(static_cast<float>(yoffset));
-}
-
-void processInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-
-	bool F4 = glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS;
-	if (F4 && !lastF4) {
-		wireFrame = !wireFrame;
-
-		if (wireFrame) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-	lastF4 = F4;
-}
-#pragma endregion

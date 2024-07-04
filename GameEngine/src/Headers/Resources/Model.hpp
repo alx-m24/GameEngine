@@ -33,6 +33,4 @@ private:
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 };
 
-extern std::unordered_map<std::string, Model> models;
-
 #endif // !MODEL_H

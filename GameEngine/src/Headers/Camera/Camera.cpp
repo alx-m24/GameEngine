@@ -11,8 +11,9 @@ void Camera::updateCameraVectors()
     Up = glm::normalize(glm::cross(Right, Front));
 }
 
-void Camera::update(GLFWwindow* window, float dt)
+void Camera::update(GLFWwindow* window, const UpdateParameters& parameters, float dt)
 {
+#pragma region Movement
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         this->move(Camera::FORWARD, dt);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -30,6 +31,10 @@ void Camera::update(GLFWwindow* window, float dt)
         this->move(Camera::LEFT, dt);
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         this->move(Camera::RIGHT, dt);
+#pragma endregion
+
+    this->rotate(parameters.xOffset, parameters.yOffset);
+    this->zoom(parameters.yScrollOffset);
 }
 
 void Camera::move(Movement movement, float dt)

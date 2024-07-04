@@ -140,8 +140,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Headers\Camera\Camera.hpp" />
+    <ClInclude Include="src\Headers\IO\Input.hpp" />
     <ClInclude Include="src\Headers\Resources\Mesh.hpp" />
     <ClInclude Include="src\Headers\Resources\Model.hpp" />
+    <ClInclude Include="src\Headers\Resources\Resources.hpp" />
     <ClInclude Include="src\Headers\Resources\Shaders\Shader.hpp" />
     <ClInclude Include="src\Headers\Resources\Textures\Textures.hpp" />
     <ClInclude Include="src\Headers\Resources\Vertex\Vertex.hpp" />

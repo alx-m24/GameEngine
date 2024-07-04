@@ -18,6 +18,7 @@ private:
     void checkCompileErrors(unsigned int shader, std::string type);
 
 public:
+    Shader() = default;
     Shader(std::string vertexSrc, std::string fragmentSrc);
 
     void use();

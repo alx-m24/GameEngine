@@ -1,13 +1,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "Textures.hpp"
 
-unsigned int loadTexture(char const* path)
+unsigned int loadTexture(std::string path)
 {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
 	int width, height, nrComponents;
-	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
 	if (data)
 	{
 		GLenum format = NULL;

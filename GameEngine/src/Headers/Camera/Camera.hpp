@@ -6,6 +6,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+// Other
+#include <string>
+#include <unordered_map>
 
 // Default camera values
 const float YAW = -90.0f;
@@ -13,6 +16,12 @@ const float PITCH = 0.0f;
 const float SPEED = 2.5f;
 const float SENSITIVITY = 0.5f;
 const float ZOOM = 45.0f;
+
+struct UpdateParameters {
+    float xOffset = 0.0f;
+    float yOffset = 0.0f;
+    float yScrollOffset = 0.0f;
+};
 
 class Camera {
 public:
@@ -51,7 +60,7 @@ public:
         updateCameraVectors();
     }
 
-    void update(GLFWwindow* window, float dt);
+    void update(GLFWwindow* window, const UpdateParameters& parameters, float dt);
 	void move(Movement movement, float dt);
     void rotate(float xoffset, float yoffset, GLboolean constrainPitch = true);
     void zoom(float yoffset);
