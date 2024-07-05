@@ -9,12 +9,14 @@
 #include <iostream>
 #include <filesystem>
 // My headers
-#include "Headers/Resources/Shaders/Shader.hpp"
 #include "Headers/Resources/Textures/Textures.hpp"
+#include "Headers/Resources/Shaders/Shader.hpp"
 #include "Headers/Resources/Resources.hpp"
 #include "Headers/Resources/Model.hpp"
 #include "Headers/Camera/Camera.hpp"
 #include "Headers/IO/Input.hpp"
+#include "Headers/Buffers.hpp"
+#include "Headers/Object.hpp"
 
 using namespace IO;
 using namespace Resources;
@@ -25,8 +27,6 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	const std::string PATH = std::filesystem::current_path().string();
 #pragma endregion
 
 #pragma region Window and Context
@@ -41,8 +41,7 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
-
-	
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -59,55 +58,12 @@ int main() {
 	glFrontFace(GL_CW);
 #pragma endregion
 
-	// Triangle
-	shaders["lightCube"] = Shader(PATH + "\\res\\Shaders\\lightCube.vert", PATH + "\\res\\Shaders\\lightCube.frag");
-	shaders["lighting"] = Shader(PATH + "\\res\\Shaders\\LightEnvironment.vert", PATH + "\\res\\Shaders\\LightEnvironment.frag");
-
-	float vertices[] = {
-		// Position				// Normal				// TexCoords
-			// Back face
-		-0.5f, -0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		0.0f, 0.0f, // Bottom-left
-		 0.5f, -0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		1.0f, 0.0f, // bottom-right    
-		 0.5f,  0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		1.0f, 1.0f, // top-right              
-		 0.5f,  0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		1.0f, 1.0f, // top-right
-		-0.5f,  0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		0.0f, 1.0f, // top-left
-		-0.5f, -0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		0.0f, 0.0f, // bottom-left                
-		// Front face
-		-0.5f, -0.5f,  0.5f,	0.0f,  0.0f, 1.0f,	  0.0f, 0.0f, // bottom-left
-		 0.5f,  0.5f,  0.5f,	0.0f,  0.0f, 1.0f,	  1.0f, 1.0f, // top-right
-		 0.5f, -0.5f,  0.5f,	0.0f,  0.0f, 1.0f,	  1.0f, 0.0f, // bottom-right        
-		 0.5f,  0.5f,  0.5f,	0.0f,  0.0f, 1.0f,	  1.0f, 1.0f, // top-right
-		-0.5f, -0.5f,  0.5f,	0.0f,  0.0f, 1.0f,    0.0f, 0.0f, // bottom-left
-		-0.5f,  0.5f,  0.5f,	0.0f,  0.0f, 1.0f,	  0.0f, 1.0f, // top-left        
-		// Left face
-		-0.5f,  0.5f,  0.5f,	-1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-right
-		-0.5f, -0.5f, -0.5f,	-1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-left
-		-0.5f,  0.5f, -0.5f,	-1.0f,  0.0f,  0.0f,  1.0f, 1.0f, // top-left       
-		-0.5f, -0.5f, -0.5f,	-1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-left
-		-0.5f,  0.5f,  0.5f,	-1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-right
-		-0.5f, -0.5f,  0.5f,	-1.0f,  0.0f,  0.0f,  0.0f, 0.0f, // bottom-right
-		// Right face
-		 0.5f,  0.5f,  0.5f,	1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-left
-		 0.5f,  0.5f, -0.5f,	1.0f,  0.0f,  0.0f,  1.0f, 1.0f, // top-right      
-		 0.5f, -0.5f, -0.5f,	1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-right          
-		 0.5f, -0.5f, -0.5f,	1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-right
-		 0.5f, -0.5f,  0.5f,	1.0f,  0.0f,  0.0f,  0.0f, 0.0f, // bottom-left
-		 0.5f,  0.5f,  0.5f,	1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-left
-		 // Bottom face          
-		 -0.5f, -0.5f, -0.5f,	0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-		  0.5f, -0.5f,  0.5f,	0.0f, -1.0f,  0.0f,  1.0f, 0.0f, // bottom-left
-		  0.5f, -0.5f, -0.5f,	0.0f, -1.0f,  0.0f,  1.0f, 1.0f, // top-left        
-		  0.5f, -0.5f,  0.5f,	0.0f, -1.0f,  0.0f,  1.0f, 0.0f, // bottom-left
-		 -0.5f, -0.5f, -0.5f,	0.0f, -1.0f,  0.0f,  0.0f, 1.0f, // top-right
-		 -0.5f, -0.5f,  0.5f,	0.0f, -1.0f,  0.0f,  0.0f, 0.0f, // bottom-right
-		 // Top face
-		 -0.5f,  0.5f, -0.5f,	0.0f,  1.0f,  0.0f,  0.0f, 1.0f, // top-left
-		  0.5f,  0.5f, -0.5f,	0.0f,  1.0f,  0.0f,  1.0f, 1.0f, // top-right
-		  0.5f,  0.5f,  0.5f,	0.0f,  1.0f,  0.0f,  1.0f, 0.0f, // bottom-right                 
-		  0.5f,  0.5f,  0.5f,	0.0f,  1.0f,  0.0f,  1.0f, 0.0f, // bottom-right
-		 -0.5f,  0.5f,  0.5f,	0.0f,  1.0f,  0.0f,  0.0f, 0.0f, // bottom-left  
-		 -0.5f,  0.5f, -0.5f,	0.0f,  1.0f,  0.0f,  0.0f, 1.0f  // top-left 
-	};
+#pragma region Load Resources
+	loadShaders();
+	loadTextures();
+	loadModels();
+	setupBuffers();
+#pragma endregion
 
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -134,45 +90,34 @@ int main() {
 		glm::vec3(1.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 1.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
-	};
+	};;
 
-	unsigned int cubeVAO, VBO;
-	glGenVertexArrays(1, &cubeVAO);
-	glGenBuffers(1, &VBO);
+	Objects cubes(buffers["cubeVAO"], 36);
+	cubes.diffuse = textures["diffuseMap"];
+	cubes.specular = textures["specularMap"];
+	cubes.shininess = 64.0f;
+	for (int i = 0; i < 10; ++i) {
+		cubes.emplace_back(Transformations{ cubePositions[i] });
+	}
 
-	glBindVertexArray(cubeVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	unsigned int lightVAO;
-	glGenVertexArrays(1, &lightVAO);
-	glBindVertexArray(lightVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// Textures
-	textures["diffuseMap"] = loadTexture(PATH + "\\res\\Textures\\container2.png");
-	textures["specularMap"] = loadTexture(PATH + "\\res\\Textures\\container2_specular.png");
-
-	models["BackBag"] = Model(PATH + "\\res\\Models\\BackBag\\backpack.obj");
+	Objects lightCubes(buffers["lightVAO"], 36);
+	lightCubes.useColor = true;
+	for (int i = 0; i < 4; ++i) {
+		lightCubes.emplace_back(Transformations{
+			pointLightPositions[i],
+			glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
+			glm::vec3(0.5f,0.5f,0.5f)
+			}
+		);
+		lightCubes[i].color = lightColor[i];
+	}
 
 	Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-	float time = glfwGetTime();
+	float time = static_cast<float>(glfwGetTime());
 	float lastTime = time;
 	while (!glfwWindowShouldClose(window)) {
-		time = glfwGetTime();
+		time = static_cast<float>(glfwGetTime());
 		float dt = time - lastTime;
 		lastTime = time;
 
@@ -183,19 +128,21 @@ int main() {
 			yoffset,
 			yScrollOffset
 		};
-		camera.update(window,cameraUpdateParams, dt);
+		if (useCam) camera.update(window,cameraUpdateParams, dt);
 
 		processInput(window);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
 		Shader& lightingShader = shaders["lighting"];
 		lightingShader.use();
 		lightingShader.setVec3("viewPos", camera.Position);
-
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) lightingShader.setBool("spot", true);
-		else lightingShader.setBool("spot", false);
+		lightingShader.setMat4("view", view);
+		lightingShader.setMat4("projection", projection);
 
 		// Directional
 		lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
@@ -252,65 +199,30 @@ int main() {
 		lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 		lightingShader.setVec3("spotLight.color", lightColor[0]);
 
-
-		// Material
-		lightingShader.setFloat("material.shininess", 64);
-
-		// Texture
-		lightingShader.setInt("material.diffuse", 0);
-		lightingShader.setInt("material.specular", 1);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textures["diffuseMap"]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textures["specularMap"]);
-
-		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-
-		lightingShader.setMat4("view", view);
-		lightingShader.setMat4("projection", projection);
+		cubes.draw(lightingShader);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		for (int i = 0; i < 10; ++i) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle * time), glm::vec3(1.0f, 0.3f, 0.5f));
-
-			lightingShader.setMat4("model", model);
-
-			glBindVertexArray(cubeVAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
-		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(time * 50.0f), glm::vec3(1.5f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		lightingShader.setMat4("model", model);
 		models["BackBag"].draw(lightingShader);
 
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -10.0f));
+		model = glm::scale(model, glm::vec3(0.02f));
+		lightingShader.setMat4("model", model);
+		models["Sponza"].draw(lightingShader);
+
 		Shader& lightCube = shaders["lightCube"];
 		lightCube.use();
 		lightCube.setMat4("view", view);
 		lightCube.setMat4("projection", projection);
-		for (int i = 0; i < 4; ++i) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, pointLightPositions[i]);
-			model = glm::scale(model, glm::vec3(0.2f));
-			lightCube.setMat4("model", model);
-			lightCube.setVec3("color", lightColor[i]);
-
-			glBindVertexArray(lightVAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		lightCubes.draw(lightCube);
 
 		glfwSwapBuffers(window);
 	}
-	glDeleteVertexArrays(1, &cubeVAO);
-	glDeleteBuffers(1, &VBO);
+	cleanup();
 
 	glfwTerminate();
 

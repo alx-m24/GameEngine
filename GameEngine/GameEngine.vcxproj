@@ -132,6 +132,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Headers\Camera\Camera.cpp" />
+    <ClCompile Include="src\Headers\LightingSystem.cpp" />
+    <ClCompile Include="src\Headers\Object.cpp" />
     <ClCompile Include="src\Headers\Resources\Mesh.cpp" />
     <ClCompile Include="src\Headers\Resources\Model.cpp" />
     <ClCompile Include="src\Headers\Resources\Shaders\Shader.cpp" />
@@ -139,14 +141,23 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Headers\Buffers.hpp" />
     <ClInclude Include="src\Headers\Camera\Camera.hpp" />
     <ClInclude Include="src\Headers\IO\Input.hpp" />
+    <ClInclude Include="src\Headers\LightingSystem.hpp" />
+    <ClInclude Include="src\Headers\Object.hpp" />
     <ClInclude Include="src\Headers\Resources\Mesh.hpp" />
     <ClInclude Include="src\Headers\Resources\Model.hpp" />
     <ClInclude Include="src\Headers\Resources\Resources.hpp" />
     <ClInclude Include="src\Headers\Resources\Shaders\Shader.hpp" />
     <ClInclude Include="src\Headers\Resources\Textures\Textures.hpp" />
     <ClInclude Include="src\Headers\Resources\Vertex\Vertex.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Shaders\lightCube.frag" />
+    <None Include="res\Shaders\lightCube.vert" />
+    <None Include="res\Shaders\LightEnvironment.frag" />
+    <None Include="res\Shaders\LightEnvironment.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -33,6 +33,12 @@
     <ClCompile Include="src\Headers\Resources\Textures\Textures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Headers\Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Headers\LightingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Headers\Camera\Camera.hpp">
@@ -59,5 +65,28 @@
     <ClInclude Include="src\Headers\Resources\Resources.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Headers\Object.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Headers\Buffers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Headers\LightingSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Shaders\lightCube.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Shaders\lightCube.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Shaders\LightEnvironment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Shaders\LightEnvironment.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

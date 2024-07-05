@@ -53,22 +53,14 @@ in vec3 Normal;
 in vec2 TexCoords;
   
 uniform vec3 viewPos;
-uniform bool spot;
 uniform Material material;
 
-uniform DirLight dirLight;
+#define NR_DIR_LIGHTS 1
+uniform DirLight dirLights[NR_DIR_LIGHTS];
 #define NR_POINT_LIGHTS 4
 uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform SpotLight spotLight;
-
-float near = 0.1; 
-float far  = 100.0; 
-  
-float LinearizeDepth(float depth) 
-{
-    float z = depth * 2.0 - 1.0; // back to NDC 
-    return (2.0 * near * far) / (far + near - z * (far - near));	
-}
+#define NR_SPOT_LIGHTS 1
+uniform SpotLight spotLights[NR_SPOT_LIGHTS];
 
 vec3 calculateDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     light.ambient *= light.color;
@@ -112,8 +104,7 @@ vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
     return (ambient + diffuse + specular);
 }
 
-vec3 calculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
-{
+vec3 calculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     light.ambient *= light.color;
     light.diffuse *= light.color;
     light.specular *= light.color;
@@ -149,15 +140,14 @@ void main()
 
     vec3 result = vec3(0.0f);
 
-    result += calculateDirLight(dirLight, norm, viewDir);
+    for (int i = 0; i < NR_DIR_LIGHTS; ++i)
+        result += calculateDirLight(dirLights[i], norm, viewDir);
 
     for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += calculatePointLight(pointLights[i], norm, FragPos, viewDir);
 
-    if (spot) result += calculateSpotLight(spotLight, norm, FragPos, viewDir);
+     for (int i = 0; i < NR_SPOT_LIGHTS; ++i)
+        result += calculateSpotLight(spotLights[i], norm, FragPos, viewDir);
     
     FragColor = vec4(result, 1.0);
-    /*float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
-    FragColor = vec4(vec3(depth), 1.0);*/
-    //FragColor = vec4(norm, 1.0);
 } 
