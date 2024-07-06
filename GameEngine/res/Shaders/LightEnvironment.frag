@@ -140,13 +140,13 @@ void main()
 
     vec3 result = vec3(0.0f);
 
-    for (int i = 0; i < NR_DIR_LIGHTS; ++i)
+    for (int i = 0; i < NR_DIR_LIGHTS; i++)
         result += calculateDirLight(dirLights[i], norm, viewDir);
 
     for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += calculatePointLight(pointLights[i], norm, FragPos, viewDir);
 
-     for (int i = 0; i < NR_SPOT_LIGHTS; ++i)
+     for (int i = 0; i < NR_SPOT_LIGHTS; i++)
         result += calculateSpotLight(spotLights[i], norm, FragPos, viewDir);
     
     FragColor = vec4(result, 1.0);

@@ -13,6 +13,7 @@
 #include "Headers/Resources/Shaders/Shader.hpp"
 #include "Headers/Resources/Resources.hpp"
 #include "Headers/Resources/Model.hpp"
+#include "Headers/LightingSystem.hpp"
 #include "Headers/Camera/Camera.hpp"
 #include "Headers/IO/Input.hpp"
 #include "Headers/Buffers.hpp"
@@ -65,6 +66,7 @@ int main() {
 	setupBuffers();
 #pragma endregion
 
+#pragma region Object Parameters
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
@@ -91,7 +93,9 @@ int main() {
 		glm::vec3(0.0f, 0.0f, 1.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	};;
+#pragma endregion
 
+#pragma region Objects
 	Objects cubes(buffers["cubeVAO"], 36);
 	cubes.diffuse = textures["diffuseMap"];
 	cubes.specular = textures["specularMap"];
@@ -113,92 +117,69 @@ int main() {
 	}
 
 	Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+#pragma endregion
 
+#pragma region Light
+	LightingSystem lightSys;
+
+	lightSys.dirLights.emplace_back(
+		DirectionalLight{
+			glm::vec3(-0.2f, -1.0f, -0.3f)
+		});
+
+	for (int i = 0; i < 4; ++i) {
+		lightSys.pointLights.emplace_back(
+			PointLight{
+				pointLightPositions[i]
+			});
+		lightSys.pointLights[i].color = lightColor[i];
+	}
+
+	lightSys.SpotLights.emplace_back(
+		SpotLight{
+			glm::vec3(0.0f, 0.0f, 10.0f)
+		});
+#pragma endregion
 	float time = static_cast<float>(glfwGetTime());
 	float lastTime = time;
 	while (!glfwWindowShouldClose(window)) {
+#pragma region Time
 		time = static_cast<float>(glfwGetTime());
 		float dt = time - lastTime;
 		lastTime = time;
+#pragma endregion
 
+#pragma region Inputs
 		glfwPollEvents();
-
 		UpdateParameters cameraUpdateParams = {
 			xoffset,
 			yoffset,
 			yScrollOffset
 		};
 		if (useCam) camera.update(window,cameraUpdateParams, dt);
-
 		processInput(window);
+#pragma endregion
 
+#pragma region Update
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+		glBindBuffer(GL_UNIFORM_BUFFER, buffers["matricesUBO"]);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 		Shader& lightingShader = shaders["lighting"];
 		lightingShader.use();
 		lightingShader.setVec3("viewPos", camera.Position);
-		lightingShader.setMat4("view", view);
-		lightingShader.setMat4("projection", projection);
 
-		// Directional
-		lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-		lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-		lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-		lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-		lightingShader.setVec3("dirLight.color", lightColor[0]);
-		// point light 1
-		lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-		lightingShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-		lightingShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-		lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-		lightingShader.setFloat("pointLights[0].constant", 1.0f);
-		lightingShader.setFloat("pointLights[0].linear", 0.09f);
-		lightingShader.setFloat("pointLights[0].quadratic", 0.032f);
-		lightingShader.setVec3("pointLights[0].color", lightColor[0]);
-		// point light 2
-		lightingShader.setVec3("pointLights[1].position", pointLightPositions[1]);
-		lightingShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-		lightingShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-		lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-		lightingShader.setFloat("pointLights[1].constant", 1.0f);
-		lightingShader.setFloat("pointLights[1].linear", 0.09f);
-		lightingShader.setFloat("pointLights[1].quadratic", 0.032f);
-		lightingShader.setVec3("pointLights[1].color", lightColor[1]);
-		// point light 3
-		lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
-		lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-		lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-		lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-		lightingShader.setFloat("pointLights[2].constant", 1.0f);
-		lightingShader.setFloat("pointLights[2].linear", 0.09f);
-		lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
-		lightingShader.setVec3("pointLights[2].color", lightColor[2]);
-		// point light 4
-		lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
-		lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-		lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-		lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-		lightingShader.setFloat("pointLights[3].constant", 1.0f);
-		lightingShader.setFloat("pointLights[3].linear", 0.09f);
-		lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
-		lightingShader.setVec3("pointLights[3].color", lightColor[3]);
-		// spotLight
-		lightingShader.setVec3("spotLight.position", camera.Position);
-		lightingShader.setVec3("spotLight.direction", camera.Front);
-		lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-		lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-		lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-		lightingShader.setFloat("spotLight.constant", 1.0f);
-		lightingShader.setFloat("spotLight.linear", 0.09f);
-		lightingShader.setFloat("spotLight.quadratic", 0.032f);
-		lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-		lightingShader.setVec3("spotLight.color", lightColor[0]);
+		lightSys.update(lightingShader);
+#pragma endregion
 
+#pragma region Draw
 		cubes.draw(lightingShader);
 
 		glm::mat4 model = glm::mat4(1.0f);
@@ -216,11 +197,10 @@ int main() {
 
 		Shader& lightCube = shaders["lightCube"];
 		lightCube.use();
-		lightCube.setMat4("view", view);
-		lightCube.setMat4("projection", projection);
 		lightCubes.draw(lightCube);
 
 		glfwSwapBuffers(window);
+#pragma endregion
 	}
 	cleanup();
 

@@ -3,7 +3,7 @@
 void LightingSystem::update(Shader& shader)
 {
 	for (int i = 0; i < dirLights.size(); ++i) {
-		std::string name = "dirLight[" + std::to_string(i) + "].";
+		std::string name = "dirLights[" + std::to_string(i) + "].";
 		DirectionalLight& dirLight = dirLights[i];
 
 		shader.setVec3(name + "direction",dirLight.direction);

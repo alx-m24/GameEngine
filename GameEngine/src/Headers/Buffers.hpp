@@ -36,6 +36,22 @@ void setupBuffers() {
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	buffers["matricesUBO"] = 0;
+	unsigned int& matricesUBO = buffers["matricesUBO"];
+	glGenBuffers(1, &matricesUBO);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, matricesUBO, 0, 2 * sizeof(glm::mat4));
+
+	unsigned int matrices_index = glGetUniformBlockIndex(shaders["lighting"].ID, "matrices");
+	glUniformBlockBinding(shaders["lighting"].ID, matrices_index, 0);
+
+	matrices_index = glGetUniformBlockIndex(shaders["lightCube"].ID, "matrices");
+	glUniformBlockBinding(shaders["lightCube"].ID, matrices_index, 0);
 }
 
 void loadShaders() {
