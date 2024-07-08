@@ -99,7 +99,7 @@ LightCubes::LightCubes(glm::vec3 positions[], glm::vec3 colors[], unsigned int c
 	glBindVertexArray(0);
 }
 
-void LightCubes::update(float time)
+void LightCubes::update()
 {
 	for (int i = 0; i < instances.objects.size(); ++i) {
 		instances.models[i] = getModelMatrix(instances.objects[i]);

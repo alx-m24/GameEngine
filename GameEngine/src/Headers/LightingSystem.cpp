@@ -1,5 +1,10 @@
 #include "LightingSystem.hpp"
 
+LightingSystem::LightingSystem(glm::vec3 pointPos[], glm::vec3 pointColor[], unsigned int count)
+{
+	lightCubes = LightCubes(pointPos, pointColor, count);
+}
+
 void LightingSystem::update(Shader& shader)
 {
 	for (int i = 0; i < dirLights.size(); ++i) {
@@ -13,6 +18,8 @@ void LightingSystem::update(Shader& shader)
 		shader.setVec3(name + "color", dirLight.color);
 	}
 
+	lightCubes.instances.models.resize(pointLights.size());
+	lightCubes.instances.objects.resize(pointLights.size());
 	for (int i = 0; i < pointLights.size(); ++i) {
 		std::string name = "pointLights[" + std::to_string(i) + "].";
 		PointLight& pointLight = pointLights[i];
@@ -40,6 +47,9 @@ void LightingSystem::update(Shader& shader)
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
+		lightCubes.colors[i] = pointLight.color;
+		lightCubes.instances.objects[i].position = pointLight.position;
+
 		shader.use();
 	}
 
@@ -59,4 +69,11 @@ void LightingSystem::update(Shader& shader)
 		shader.setFloat(name + "outerCutOff", spotLight.outerCutOff);
 		shader.setVec3(name + "color", spotLight.color);
 	}
+
+	lightCubes.update();
+}
+
+void LightingSystem::drawLightSources(Shader& shader)
+{
+	lightCubes.draw(shader);
 }

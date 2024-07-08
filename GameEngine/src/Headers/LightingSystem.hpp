@@ -1,4 +1,6 @@
 #pragma once
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -6,6 +8,7 @@
 
 #include "Resources/Shaders/Shader.hpp"
 #include "Resources/Resources.hpp"
+#include "Object.hpp"
 
 using namespace Resources;
 
@@ -47,8 +50,12 @@ public:
 	std::vector<DirectionalLight> dirLights;
 	std::vector<PointLight> pointLights;
 	std::vector<SpotLight> SpotLights;
+	LightCubes lightCubes;
 
 public:
+	LightingSystem(glm::vec3 pointPos[], glm::vec3 pointColor[], unsigned int count);
+
 	void update(Shader& shader);
+	void drawLightSources(Shader& shader);
 };
 

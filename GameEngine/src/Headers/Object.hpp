@@ -18,14 +18,15 @@ public:
 };
 
 class LightCubes {
-private:
+public:
 	Instanced instances;
 	unsigned int instancedColorsVBO = 0;
 	std::vector<glm::vec3> colors;
 
 public:
+	LightCubes() = default;
 	LightCubes(glm::vec3 positions[], glm::vec3 colors[], unsigned int count);
 
-	void update(float time);
+	void update();
 	void draw(Shader& shader);
 };

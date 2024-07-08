@@ -96,7 +96,7 @@ int main() {
 #pragma endregion
 
 #pragma region Light
-	LightingSystem lightSys;
+	LightingSystem lightSys(pointLightPositions, lightColor, 4);
 
 	lightSys.dirLights.emplace_back(
 		DirectionalLight{
@@ -119,7 +119,6 @@ int main() {
 
 #pragma region Objects
 	Containers containers(cubePositions, 10);
-	LightCubes lightCubes(pointLightPositions, lightColor, 4);
 
 	Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
@@ -165,7 +164,6 @@ int main() {
 
 		lightSys.update(shaders["lighting"]);
 		containers.update(time);
-		lightCubes.update(time);
 
 		models["BackBag"].instances.objects[0].rotation = {1.5f, 1.0f, 0.0f, time * 50.0f};
 		models["BackBag"].update();
@@ -179,7 +177,7 @@ int main() {
 		models["Sponza"].draw(shaders["lighting"]);
 
 		shaders["lightCube"].use();
-		lightCubes.draw(shaders["lightCube"]);
+		lightSys.drawLightSources(shaders["lightCube"]);
 
 		glfwSwapBuffers(window);
 #pragma endregion
