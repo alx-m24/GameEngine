@@ -1,32 +1,31 @@
 #pragma once
-// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-// Other
-#include <vector>
-#include "Resources/Shaders/Shader.hpp"
+#include "Resources/Model.hpp" // Always include this Header as it is the implementation of "Transformations" & "Instances"
+#include "Resources/Resources.hpp"
 
-struct Transformations {
-	glm::vec3 position = { 0.0f, 0.0f, 0.0f };
-	// Last term is the angle in degrees
-	glm::vec4 rotation = { 1.0f, 1.0f, 1.0f, 0.0f };
-	glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
-	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+using namespace Resources;
+
+class Containers {
+private:
+	Instanced instances;
+
+public:
+	Containers(glm::vec3 positions[], unsigned int count);
+
+	void update(float time);
+	void draw(Shader& shader);
 };
 
-class Objects : public std::vector<Transformations> {
+class LightCubes {
 private:
-	unsigned int VAO;
-	unsigned int vertexNum;
+	Instanced instances;
+	unsigned int instancedColorsVBO = 0;
+	std::vector<glm::vec3> colors;
 
 public:
-	unsigned int diffuse = 0, specular = 0;
-	float shininess = 64.0f;
-	bool useColor = false;
+	LightCubes(glm::vec3 positions[], glm::vec3 colors[], unsigned int count);
 
-public:
-	Objects(unsigned int VAO, unsigned int vertexNum) : VAO(VAO), vertexNum(vertexNum) {};
-
+	void update(float time);
 	void draw(Shader& shader);
 };

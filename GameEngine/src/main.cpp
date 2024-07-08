@@ -18,6 +18,7 @@
 #include "Headers/IO/Input.hpp"
 #include "Headers/Buffers.hpp"
 #include "Headers/Object.hpp"
+#include "Headers/GUI.hpp"
 
 using namespace IO;
 using namespace Resources;
@@ -42,7 +43,6 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -95,30 +95,6 @@ int main() {
 	};;
 #pragma endregion
 
-#pragma region Objects
-	Objects cubes(buffers["cubeVAO"], 36);
-	cubes.diffuse = textures["diffuseMap"];
-	cubes.specular = textures["specularMap"];
-	cubes.shininess = 64.0f;
-	for (int i = 0; i < 10; ++i) {
-		cubes.emplace_back(Transformations{ cubePositions[i] });
-	}
-
-	Objects lightCubes(buffers["lightVAO"], 36);
-	lightCubes.useColor = true;
-	for (int i = 0; i < 4; ++i) {
-		lightCubes.emplace_back(Transformations{
-			pointLightPositions[i],
-			glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
-			glm::vec3(0.5f,0.5f,0.5f)
-			}
-		);
-		lightCubes[i].color = lightColor[i];
-	}
-
-	Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-#pragma endregion
-
 #pragma region Light
 	LightingSystem lightSys;
 
@@ -140,6 +116,18 @@ int main() {
 			glm::vec3(0.0f, 0.0f, 10.0f)
 		});
 #pragma endregion
+
+#pragma region Objects
+	Containers containers(cubePositions, 10);
+	LightCubes lightCubes(pointLightPositions, lightColor, 4);
+
+	Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+	models["BackBag"].instances.objects.emplace_back(Transformations{ {5.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
+	models["BackBag"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, 5.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
+	models["Sponza"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, -10.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.02f, 0.02f, 0.02f} });
+#pragma endregion
+
 	float time = static_cast<float>(glfwGetTime());
 	float lastTime = time;
 	while (!glfwWindowShouldClose(window)) {
@@ -172,32 +160,26 @@ int main() {
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-		Shader& lightingShader = shaders["lighting"];
-		lightingShader.use();
-		lightingShader.setVec3("viewPos", camera.Position);
+		shaders["lighting"].use();
+		shaders["lighting"].setVec3("viewPos", camera.Position);
 
-		lightSys.update(lightingShader);
+		lightSys.update(shaders["lighting"]);
+		containers.update(time);
+		lightCubes.update(time);
+
+		models["BackBag"].instances.objects[0].rotation = {1.5f, 1.0f, 0.0f, time * 50.0f};
+		models["BackBag"].update();
+		models["Sponza"].update();
 #pragma endregion
 
 #pragma region Draw
-		cubes.draw(lightingShader);
+		containers.draw(shaders["lighting"]);
+		
+		models["BackBag"].draw(shaders["lighting"]);
+		models["Sponza"].draw(shaders["lighting"]);
 
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(time * 50.0f), glm::vec3(1.5f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-		lightingShader.setMat4("model", model);
-		models["BackBag"].draw(lightingShader);
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -10.0f));
-		model = glm::scale(model, glm::vec3(0.02f));
-		lightingShader.setMat4("model", model);
-		models["Sponza"].draw(lightingShader);
-
-		Shader& lightCube = shaders["lightCube"];
-		lightCube.use();
-		lightCubes.draw(lightCube);
+		shaders["lightCube"].use();
+		lightCubes.draw(shaders["lightCube"]);
 
 		glfwSwapBuffers(window);
 #pragma endregion

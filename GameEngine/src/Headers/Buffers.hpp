@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Resources/Resources.hpp"
+#include <iostream>
 
 using namespace Resources;
 
@@ -18,7 +19,7 @@ void setupBuffers() {
 	glBindVertexArray(cubeVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices::cube), Vertices::cube, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * 36, Vertices::cube, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);

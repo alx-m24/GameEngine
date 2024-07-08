@@ -25,6 +25,22 @@ void LightingSystem::update(Shader& shader)
 		shader.setFloat(name + "linear", pointLight.linear);
 		shader.setFloat(name + "quadratic", pointLight.quadratic);
 		shader.setVec3(name + "color", pointLight.color);
+
+		Shader& lightCube = shaders["lightCube"];
+		lightCube.use();
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, pointLight.position);
+		model = glm::scale(model, glm::vec3(0.5f));
+
+		lightCube.setMat4("model", model);
+		lightCube.setVec3("material.color", pointLight.color);
+
+		glBindVertexArray(buffers["lightVAO"]);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+
+		shader.use();
 	}
 
 	for (int i = 0; i < SpotLights.size(); ++i) {

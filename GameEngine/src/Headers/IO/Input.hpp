@@ -9,7 +9,8 @@ namespace IO {
 
 	bool lastF4;
 	bool firstMouse = true;
-	bool useCam = true;
+	bool useCam = false;
+	bool lastEsc = false;
 
 	float lastX = SCR_WIDTH / 2.0f;
 	float lastY = SCR_HEIGHT / 2.0f;
@@ -56,15 +57,14 @@ void inline scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void inline processInput(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		IO::useCam = false;
-	}
+	bool Esc = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+	if (Esc && !lastEsc) {
+		useCam = !useCam;
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1)) {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		IO::useCam = true;
+		if (useCam) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
+	lastEsc = Esc;
 
 	bool F4 = glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS;
 	if (F4 && !lastF4) {

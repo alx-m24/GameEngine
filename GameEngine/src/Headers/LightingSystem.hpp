@@ -5,6 +5,9 @@
 #include <vector>
 
 #include "Resources/Shaders/Shader.hpp"
+#include "Resources/Resources.hpp"
+
+using namespace Resources;
 
 struct DirectionalLight {
 	glm::vec3 direction = { 0.0f, 0.0f, -1.0f };

@@ -1,15 +1,90 @@
 #include "Model.hpp"
 
+glm::mat4 getModelMatrix(Transformations& transformation)
+{
+    glm::mat4 model = glm::mat4(1.0f);
+
+    model = glm::translate(model, transformation.position);
+    model = glm::rotate(
+        model,
+        glm::radians(transformation.rotation.w),
+        {
+            transformation.rotation.x,
+            transformation.rotation.y,
+            transformation.rotation.z
+        }
+    );
+    model = glm::scale(model, transformation.scale);
+
+    return model;
+}
+
+Model::Model()
+{
+    setupVAOs();
+}
+
 Model::Model(std::string path)
 {
 	this->loadModel(path);
+
+    setupVAOs();
+}
+
+void Model::update()
+{
+    if (instances.objects.size() <= 0) return;
+
+    instances.models.resize(instances.objects.size());
+
+    for (int i = 0; i < instances.objects.size(); ++i) {
+        instances.models[i] = getModelMatrix(instances.objects[i]);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, instances.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * std::max(1, (int)instances.objects.size()), &instances.models[0], GL_DYNAMIC_DRAW);
 }
 
 void Model::draw(Shader& shader)
 {
     glFrontFace(GL_CCW);
-	for (unsigned int i = 0; i < meshes.size(); ++i) meshes[i].draw(shader);
+    for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+        glBindVertexArray(meshes[i].VAO);
+        meshes[i].draw(shader);
+        glDrawElementsInstanced(GL_TRIANGLES, meshes[i].indices.size(), GL_UNSIGNED_INT, 0, instances.objects.size());
+    }
     glFrontFace(GL_CW);
+}
+
+void Model::setupVAOs()
+{
+    glGenBuffers(1, &instances.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instances.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * std::max(1, (int)instances.objects.size()), nullptr, GL_DYNAMIC_DRAW);
+
+    for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+        unsigned int VAO = meshes[i].VAO;
+        glBindVertexArray(VAO);
+        // vertex attributes
+        size_t vec4Size = sizeof(glm::vec4);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    }
 }
 
 void Model::loadModel(std::string path)
