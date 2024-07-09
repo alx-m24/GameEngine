@@ -93,6 +93,9 @@ int main() {
 		glm::vec3(0.0f, 0.0f, 1.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	};;
+
+	float time = static_cast<float>(glfwGetTime());
+	float lastTime = time;
 #pragma endregion
 
 #pragma region Light
@@ -100,7 +103,7 @@ int main() {
 
 	lightSys.dirLights.emplace_back(
 		DirectionalLight{
-			glm::vec3(-0.2f, -1.0f, -0.3f)
+			glm::vec3(-0.2f, -1.0f, -0.3f),
 		});
 
 	for (int i = 0; i < 4; ++i) {
@@ -113,7 +116,7 @@ int main() {
 
 	lightSys.SpotLights.emplace_back(
 		SpotLight{
-			glm::vec3(0.0f, 0.0f, 10.0f)
+			glm::vec3(0.0f, 10.0f, 0.0f)
 		});
 #pragma endregion
 
@@ -125,10 +128,12 @@ int main() {
 	models["BackBag"].instances.objects.emplace_back(Transformations{ {5.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
 	models["BackBag"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, 5.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
 	models["Sponza"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, -10.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.02f, 0.02f, 0.02f} });
-#pragma endregion
 
-	float time = static_cast<float>(glfwGetTime());
-	float lastTime = time;
+	GUI gui(
+		window,
+		lightSys
+	);
+#pragma endregion
 	while (!glfwWindowShouldClose(window)) {
 #pragma region Time
 		time = static_cast<float>(glfwGetTime());
@@ -148,6 +153,8 @@ int main() {
 #pragma endregion
 
 #pragma region Update
+		if (!useCam) gui.update(time);
+
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -178,6 +185,8 @@ int main() {
 
 		shaders["lightCube"].use();
 		lightSys.drawLightSources(shaders["lightCube"]);
+
+		gui.draw();
 
 		glfwSwapBuffers(window);
 #pragma endregion

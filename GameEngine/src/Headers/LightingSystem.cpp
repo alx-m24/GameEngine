@@ -18,8 +18,28 @@ void LightingSystem::update(Shader& shader)
 		shader.setVec3(name + "color", dirLight.color);
 	}
 
-	lightCubes.instances.models.resize(pointLights.size());
-	lightCubes.instances.objects.resize(pointLights.size());
+	for (int i = 0; i < SpotLights.size(); ++i) {
+		std::string name = "spotLights[" + std::to_string(i) + "].";
+		SpotLight& spotLight = SpotLights[i];
+
+		shader.setVec3(name + "position", spotLight.position);
+
+		shader.setVec3(name + "direction", spotLight.direcion);
+
+		shader.setVec3(name + "ambient", spotLight.ambient);
+		shader.setVec3(name + "diffuse", spotLight.diffuse);
+		shader.setVec3(name + "specular", spotLight.specular);
+
+		shader.setFloat(name + "constant", spotLight.constant);
+		shader.setFloat(name + "linear", spotLight.linear);
+		shader.setFloat(name + "quadratic", spotLight.quadratic);
+
+		shader.setFloat(name + "cutOff", spotLight.cutOff);
+		shader.setFloat(name + "outerCutOff", spotLight.outerCutOff);
+
+		shader.setVec3(name + "color", spotLight.color);
+	}
+
 	for (int i = 0; i < pointLights.size(); ++i) {
 		std::string name = "pointLights[" + std::to_string(i) + "].";
 		PointLight& pointLight = pointLights[i];
@@ -53,27 +73,26 @@ void LightingSystem::update(Shader& shader)
 		shader.use();
 	}
 
-	for (int i = 0; i < SpotLights.size(); ++i) {
-		std::string name = "spotLights[" + std::to_string(i) + "].";
-		SpotLight& spotLight = SpotLights[i];
-
-		shader.setVec3(name + "position", spotLight.position);
-		shader.setVec3(name + "direcion", spotLight.direcion);
-		shader.setVec3(name + "ambient", spotLight.ambient);
-		shader.setVec3(name + "diffuse", spotLight.diffuse);
-		shader.setVec3(name + "specular", spotLight.specular);
-		shader.setFloat(name + "constant", spotLight.constant);
-		shader.setFloat(name + "linear", spotLight.linear);
-		shader.setFloat(name + "quadratic", spotLight.quadratic);
-		shader.setFloat(name + "cutOff", spotLight.cutOff);
-		shader.setFloat(name + "outerCutOff", spotLight.outerCutOff);
-		shader.setVec3(name + "color", spotLight.color);
-	}
-
 	lightCubes.update();
 }
 
 void LightingSystem::drawLightSources(Shader& shader)
 {
 	lightCubes.draw(shader);
+}
+
+void LightingSystem::addDirectionalLight(DirectionalLight dirLight)
+{
+	dirLights.emplace_back(dirLight);
+}
+
+void LightingSystem::addPointLight(PointLight pointlight)
+{
+	pointLights.emplace_back(pointlight);
+	lightCubes.add(pointlight.position, pointlight.color);
+}
+
+void LightingSystem::addSpotlLight(SpotLight spotLight)
+{
+	SpotLights.emplace_back(spotLight);
 }

@@ -58,6 +58,31 @@ void Containers::draw(Shader& shader)
 	glBindVertexArray(0);
 }
 
+void Containers::add(glm::vec3 position)
+{
+	instances.objects.emplace_back(Transformations{ position });
+}
+
+void Containers::erase(unsigned int idx)
+{
+	instances.objects.erase(instances.objects.begin() + idx);
+}
+
+void Containers::resize(size_t size)
+{
+	instances.objects.reserve(size);
+}
+
+size_t Containers::getSize()
+{
+	return size_t(instances.objects.size());
+}
+
+Transformations& Containers::operator[](unsigned int idx)
+{
+	return instances.objects[idx];
+}
+
 LightCubes::LightCubes(glm::vec3 positions[], glm::vec3 colors[], unsigned int count)
 {
 	for (unsigned int i = 0; i < count; ++i) {
@@ -116,4 +141,35 @@ void LightCubes::draw(Shader& shader)
 	glBindVertexArray(buffers["lightVAO"]);
 	glDrawArraysInstanced(GL_TRIANGLES, 0, 36, instances.objects.size());
 	glBindVertexArray(0);
+}
+
+void LightCubes::add(glm::vec3 position, glm::vec3 color)
+{
+	instances.objects.emplace_back(Transformations{ position });
+	colors.emplace_back(color);
+}
+
+void LightCubes::erase(unsigned int idx)
+{
+	instances.objects.erase(instances.objects.begin() + idx);
+	colors.erase(colors.begin() + idx);
+}
+
+void LightCubes::resize(size_t size)
+{
+	instances.objects.resize(size);
+	colors.resize(size);
+}
+
+size_t LightCubes::getSize()
+{
+	return size_t(instances.objects.size());
+}
+
+std::pair<Transformations&, glm::vec3&> LightCubes::operator[](unsigned int idx)
+{
+	return std::pair<Transformations&, glm::vec3&>(
+		instances.objects[idx],
+		colors[idx]
+	);
 }

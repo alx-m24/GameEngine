@@ -11,10 +11,16 @@ private:
 	Instanced instances;
 
 public:
+	Containers() = default;
 	Containers(glm::vec3 positions[], unsigned int count);
 
 	void update(float time);
 	void draw(Shader& shader);
+	void add(glm::vec3 position);
+	void erase(unsigned int idx);
+	void resize(size_t size);
+	size_t getSize();
+	Transformations& operator[](unsigned int idx);
 };
 
 class LightCubes {
@@ -29,4 +35,9 @@ public:
 
 	void update();
 	void draw(Shader& shader);
+	void add(glm::vec3 position, glm::vec3 color);
+	void erase(unsigned int idx);
+	void resize(size_t size);
+	size_t getSize();
+	std::pair<Transformations&, glm::vec3&> operator[](unsigned int idx);
 };

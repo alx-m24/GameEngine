@@ -14,9 +14,9 @@ using namespace Resources;
 
 struct DirectionalLight {
 	glm::vec3 direction = { 0.0f, 0.0f, -1.0f };
-	glm::vec3 ambient = { 0.05f, 0.05f, 0.05f };
-	glm::vec3 diffuse = { 0.4f, 0.4f, 0.4f };
-	glm::vec3 specular = { 0.5f, 0.5f, 0.5f };
+	glm::vec3 ambient = { 0.14f, 0.14f, 0.14f };
+	glm::vec3 diffuse = { 0.58f, 0.58f, 0.58f };
+	glm::vec3 specular = { 1.0f, 1.0f, 1.0f };
 	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 };
 
@@ -33,7 +33,7 @@ struct PointLight {
 
 struct SpotLight {
 	glm::vec3 position = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 direcion = { 0.0f, 1.0f, 0.0f };
+	glm::vec3 direcion = { 0.0f, -1.0f, 0.0f };
 	glm::vec3 ambient = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 diffuse = { 1.0f, 1.0f, 1.0f };
 	glm::vec3 specular = { 1.0f, 1.0f, 1.0f };
@@ -57,5 +57,8 @@ public:
 
 	void update(Shader& shader);
 	void drawLightSources(Shader& shader);
+	void addDirectionalLight(DirectionalLight dirLight);
+	void addPointLight(PointLight pointlight);
+	void addSpotlLight(SpotLight spotLight);
 };
 
