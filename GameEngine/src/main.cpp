@@ -29,6 +29,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 #pragma endregion
 
 #pragma region Window and Context
@@ -38,7 +39,7 @@ int main() {
 		return EXIT_FAILURE;
 	}
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	//glfwSwapInterval(1);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -54,6 +55,7 @@ int main() {
 #pragma region OpenGL Parameters
 	stbi_set_flip_vertically_on_load(true);
 
+	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
