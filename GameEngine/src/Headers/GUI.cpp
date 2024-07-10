@@ -1,26 +1,25 @@
 #include "GUI.hpp"
 
-
-void GUI::metricsWindow()
+void GUI::lightAndCamWindow()
 {
-    static bool showMetrics = true;
-    ImGui::Begin("Metrics", &showMetrics, ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground);
-
-    std::string text = "Framerate: " + std::to_string(framerate);
-    ImGui::Text(text.c_str());
+    ImGui::Begin("Lighting and Cameras");
+    ImGui::BeginTabBar("LightingAndCameras", {});
+    if (ImGui::TabItemButton("Lighting")) lightingWindow = true;
+    if (ImGui::TabItemButton("Cameras")) lightingWindow = false;
+    ImGui::EndTabBar();
+   
+    lightingWindow ? lighting() : cameraWindow();
 
     ImGui::End();
 }
 
-void GUI::lightWindow()
+void GUI::lighting()
 {
-    ImGui::Begin("Lighting");
-
     ImGui::SeparatorText("Directional Lights");
-    ImGui::BeginChild("Directional Lights", {0, static_cast<float>(112 * lightSys.dirLights.size()) });
+    ImGui::BeginChild("Directional Lights", { 0, static_cast<float>(130 * lightSys.dirLights.size()) });
     for (int i = 0; i < lightSys.dirLights.size(); ++i) {
         if (i > 0) ImGui::Separator();
-        ImGui::BeginChild("DirLight" + i, {0, 112});
+        ImGui::BeginChild("DirLight" + i, { 0, 125 });
 
         DirectionalLight& dirLight = lightSys.dirLights[i];
         glm::vec3& dir = dirLight.direction;
@@ -37,13 +36,18 @@ void GUI::lightWindow()
 
         ImGui::EndChild();
     }
+
+    if (ImGui::Button("Add Directional Light")) {
+        lightSys.addDirectionalLight(DirectionalLight{});
+    }
+
     ImGui::EndChild();
 
     ImGui::SeparatorText("Point Lights");
-    ImGui::BeginChild("Point Lights", { 0, static_cast<float>(112 * lightSys.pointLights.size()) });
+    ImGui::BeginChild("Point Lights", { 0, static_cast<float>(120 * lightSys.pointLights.size()) });
     for (int i = 0; i < lightSys.pointLights.size(); ++i) {
         if (i > 0) ImGui::Separator();
-        ImGui::BeginChild("PointLight" + i, { 0, 112 });
+        ImGui::BeginChild("PointLight" + i, { 0, 120 });
 
         PointLight& pointLight = lightSys.pointLights[i];
         glm::vec3& position = pointLight.position;
@@ -60,13 +64,18 @@ void GUI::lightWindow()
 
         ImGui::EndChild();
     }
+
+    if (ImGui::Button("Add Point Light")) {
+        lightSys.addPointLight(PointLight{});
+    }
+
     ImGui::EndChild();
 
     ImGui::SeparatorText("Spot Lights");
-    ImGui::BeginChild("Spot Lights", {0, static_cast<float>(180 * lightSys.SpotLights.size()) });
+    ImGui::BeginChild("Spot Lights", { 0, static_cast<float>(180 * lightSys.SpotLights.size()) });
     for (int i = 0; i < lightSys.SpotLights.size(); ++i) {
         if (i > 0) ImGui::Separator();
-        ImGui::BeginChild("Spot" + i, {0, 180});
+        ImGui::BeginChild("Spot" + i, { 0, 180 });
 
         SpotLight& pointLight = lightSys.SpotLights[i];
         glm::vec3& position = pointLight.position;
@@ -98,12 +107,95 @@ void GUI::lightWindow()
 
         ImGui::EndChild();
     }
+
+    if (ImGui::Button("Add Spot Light")) {
+        lightSys.addSpotlLight(SpotLight{});
+    }
+
     ImGui::EndChild();
+}
+
+void GUI::cameraWindow()
+{
+    bool camChanged = false;
+
+    ImGui::BeginChild("Cameras");
+    for (unsigned int i = 0; i < cameras.size(); ++i) {
+        if (i > 0) ImGui::Separator();
+
+        ImGui::BeginChild("Cam" + i, { 0, 110 });
+
+        Camera& cam = cameras[i];
+
+        glm::vec3& position = cam.Position;
+        glm::vec3& rotation = cam.Front;
+        bool useCam = i == usedCamIdx;
+
+        ImGui::DragFloat3("Position", &position[0], 0.05f);
+        ImGui::DragFloat3("Rotation", &rotation[0], 0.05f);
+        ImGui::DragFloat("Speed", &cam.MovementSpeed, 0.25f, 1.0f);
+        if (ImGui::Checkbox("UseCam", &useCam)) {
+            camChanged = true;
+            usedCamIdx = i;
+        }
+
+        if (cameras.size() > 1) {
+            if (ImGui::Button("Delete")) {
+                cameras.erase(cameras.begin() + i);
+            }
+        }
+
+        ImGui::EndChild();
+    }
+
+    if (ImGui::Button("Add Camera")) {
+        cameras.emplace_back(Camera());
+    }
+
+    ImGui::EndChild();
+
+    if (usedCamIdx > cameras.size() - 1) {
+        usedCamIdx = (cameras.size() - 1 >= 0) ? (cameras.size() - 1) : 0;
+    }
+}
+
+void GUI::objectsWindow()
+{
+    ImGui::Begin("Objects");
+
+    for (std::pair<std::string, std::vector<Transformations>&>& objs : objects) {
+        ImGui::BeginChild(objs.first.c_str());
+        ImGui::SeparatorText(std::string(objs.first + ": " + std::to_string(objs.second.size())).c_str());
+
+        if (ImGui::Button("Add")) {
+            objs.second.emplace_back(Transformations{});
+        }
+
+        for (unsigned int i = 0; i < objs.second.size(); ++i) {
+
+            ImGui::BeginChild(std::string(objs.first + std::to_string(i)).c_str(), {0, 90});
+
+            Transformations& trans = objs.second[i];
+
+            ImGui::DragFloat3("Position", &trans.position[0], 0.05f);
+            ImGui::DragFloat4("Rotation", &trans.rotation[0], 0.05f);
+            ImGui::DragFloat3("Scale", &trans.scale[0], 0.025f);
+            
+            if (ImGui::Button("Delete")) {
+                objs.second.erase(objs.second.begin() + i);
+            }
+
+            ImGui::EndChild();
+            ImGui::Separator();
+        }
+
+        ImGui::EndChild();
+    }
 
     ImGui::End();
 }
 
-GUI::GUI(GLFWwindow* window, LightingSystem& lightSys) : lightSys(lightSys)
+GUI::GUI(GLFWwindow* window, LightingSystem& lightSys, unsigned int& usedCamIdx, std::vector<Camera>& cameras, std::vector<std::pair<std::string, std::vector<Transformations>&>>& objects) : lightSys(lightSys), usedCamIdx(usedCamIdx), cameras(cameras), objects(objects)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -129,8 +221,9 @@ void GUI::update(float time) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    metricsWindow();
-    lightWindow();
+    lightAndCamWindow();
+    objectsWindow();
+    ImGui::ShowMetricsWindow();
 }
 
 void GUI::draw()

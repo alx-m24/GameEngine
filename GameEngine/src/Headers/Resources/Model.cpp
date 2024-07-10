@@ -33,16 +33,15 @@ Model::Model(std::string path)
 
 void Model::update()
 {
-    if (instances.objects.size() <= 0) return;
+    unsigned int n = instances.objects.size();
+    if (n != instances.models.size()) instances.models.resize(n);
 
-    instances.models.resize(instances.objects.size());
-
-    for (int i = 0; i < instances.objects.size(); ++i) {
+    for (int i = 0; i < n; ++i) {
         instances.models[i] = getModelMatrix(instances.objects[i]);
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, instances.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * std::max(1, (int)instances.objects.size()), &instances.models[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * std::max(1u, n), &instances.models[0], GL_DYNAMIC_DRAW);
 }
 
 void Model::draw(Shader& shader)

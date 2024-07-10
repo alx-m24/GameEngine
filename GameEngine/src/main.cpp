@@ -123,15 +123,29 @@ int main() {
 #pragma region Objects
 	Containers containers(cubePositions, 10);
 
-	Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+	unsigned int usedCamIdx = 0;
+	std::vector<Camera> cameras = { 
+		Camera(glm::vec3(0.0f, 0.0f, 3.0f)),
+		Camera(glm::vec3(5.0f, 10.0f, 3.0f)),
+		Camera(glm::vec3(-5.0f, -10.0f, 0.0f)),
+		Camera(glm::vec3(0.0f, 25.0f, -5.0f))
+	};
 
 	models["BackBag"].instances.objects.emplace_back(Transformations{ {5.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
 	models["BackBag"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, 5.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
 	models["Sponza"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, -10.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.02f, 0.02f, 0.02f} });
 
+	std::vector<std::pair<std::string, std::vector<Transformations>&>> objects;
+	objects.push_back({ "Containers", containers.instances.objects});
+	objects.push_back({ "BackBags", models["BackBag"].instances.objects });
+	objects.push_back({ "Sponza", models["Sponza"].instances.objects});
+
 	GUI gui(
 		window,
-		lightSys
+		lightSys,
+		usedCamIdx,
+		cameras,
+		objects
 	);
 #pragma endregion
 	while (!glfwWindowShouldClose(window)) {
@@ -148,18 +162,18 @@ int main() {
 			yoffset,
 			yScrollOffset
 		};
-		if (useCam) camera.update(window,cameraUpdateParams, dt);
+		if (useCam) cameras[usedCamIdx].update(window, cameraUpdateParams, dt);
 		processInput(window);
 #pragma endregion
 
 #pragma region Update
-		if (!useCam) gui.update(time);
+		gui.update(time);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = cameras[usedCamIdx].GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(cameras[usedCamIdx].Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 		glBindBuffer(GL_UNIFORM_BUFFER, buffers["matricesUBO"]);
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
@@ -167,7 +181,7 @@ int main() {
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		shaders["lighting"].use();
-		shaders["lighting"].setVec3("viewPos", camera.Position);
+		shaders["lighting"].setVec3("viewPos", cameras[usedCamIdx].Position);
 
 		lightSys.update(shaders["lighting"]);
 		containers.update(time);

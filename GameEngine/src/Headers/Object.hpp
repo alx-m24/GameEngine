@@ -7,7 +7,7 @@
 using namespace Resources;
 
 class Containers {
-private:
+public:
 	Instanced instances;
 
 public:

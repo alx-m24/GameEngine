@@ -33,13 +33,16 @@ Containers::Containers(glm::vec3 positions[], unsigned int count)
 
 void Containers::update(float time)
 {
-	for (int i = 0; i < instances.objects.size(); ++i) {
+	unsigned int n = instances.objects.size();
+	if (n != instances.models.size()) instances.models.resize(n);
+
+	for (int i = 0; i < n; ++i) {
 		instances.objects[i].rotation.w = time * i * 10;
 		instances.models[i] = getModelMatrix(instances.objects[i]);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, instances.VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * instances.objects.size(), &instances.models[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * n, &instances.models[0], GL_DYNAMIC_DRAW);
 }
 
 void Containers::draw(Shader& shader)
@@ -126,14 +129,17 @@ LightCubes::LightCubes(glm::vec3 positions[], glm::vec3 colors[], unsigned int c
 
 void LightCubes::update()
 {
-	for (int i = 0; i < instances.objects.size(); ++i) {
+	unsigned int n = instances.objects.size();
+	if (n != instances.models.size()) instances.models.resize(n);
+
+	for (int i = 0; i < n; ++i) {
 		instances.models[i] = getModelMatrix(instances.objects[i]);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, instancedColorsVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * instances.objects.size(), &colors[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * n, &colors[0], GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, instances.VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * instances.objects.size(), &instances.models[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * n, &instances.models[0], GL_DYNAMIC_DRAW);
 }
 
 void LightCubes::draw(Shader& shader)
