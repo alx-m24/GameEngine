@@ -36,7 +36,7 @@ void Containers::update(float time)
 	unsigned int n = instances.objects.size();
 	if (n != instances.models.size()) instances.models.resize(n);
 
-	for (int i = 0; i < n; ++i) {
+	for (unsigned int i = 0; i < n; ++i) {
 		instances.objects[i].rotation.w = time * i * 10;
 		instances.models[i] = getModelMatrix(instances.objects[i]);
 	}
@@ -47,7 +47,7 @@ void Containers::update(float time)
 
 void Containers::draw(Shader& shader)
 {
-	shader.setFloat("material.shininess", 64.0f);
+	shader.setFloat("material.shininess", instances.shininess);
 
 	shader.setInt("material.diffuse", 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -132,7 +132,7 @@ void LightCubes::update()
 	unsigned int n = instances.objects.size();
 	if (n != instances.models.size()) instances.models.resize(n);
 
-	for (int i = 0; i < n; ++i) {
+	for (unsigned int i = 0; i < n; ++i) {
 		instances.models[i] = getModelMatrix(instances.objects[i]);
 	}
 
@@ -144,6 +144,8 @@ void LightCubes::update()
 
 void LightCubes::draw(Shader& shader)
 {
+	shader.setFloat("material.shininess", instances.shininess);
+
 	glBindVertexArray(buffers["lightVAO"]);
 	glDrawArraysInstanced(GL_TRIANGLES, 0, 36, instances.objects.size());
 	glBindVertexArray(0);

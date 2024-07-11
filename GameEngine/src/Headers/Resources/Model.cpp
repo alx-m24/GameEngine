@@ -36,7 +36,7 @@ void Model::update()
     unsigned int n = instances.objects.size();
     if (n != instances.models.size()) instances.models.resize(n);
 
-    for (int i = 0; i < n; ++i) {
+    for (unsigned int i = 0; i < n; ++i) {
         instances.models[i] = getModelMatrix(instances.objects[i]);
     }
 
@@ -46,6 +46,8 @@ void Model::update()
 
 void Model::draw(Shader& shader)
 {
+    shader.setFloat("material.shininess", instances.shininess);
+
     glFrontFace(GL_CCW);
     for (unsigned int i = 0; i < meshes.size(); i++)
     {

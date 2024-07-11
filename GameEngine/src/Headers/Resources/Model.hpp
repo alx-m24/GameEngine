@@ -24,6 +24,7 @@ struct Transformations {
 
 struct Instanced {
 	unsigned int VBO = 0;
+	float shininess = 64.0f;
 	std::vector<glm::mat4> models;
 	std::vector<Transformations> objects;
 };

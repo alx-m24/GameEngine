@@ -39,7 +39,7 @@ int main() {
 		return EXIT_FAILURE;
 	}
 	glfwMakeContextCurrent(window);
-	//glfwSwapInterval(1);
+	glfwSwapInterval(1);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -98,6 +98,7 @@ int main() {
 
 	float time = static_cast<float>(glfwGetTime());
 	float lastTime = time;
+	bool gamma = true;
 #pragma endregion
 
 #pragma region Light
@@ -124,6 +125,7 @@ int main() {
 
 #pragma region Objects
 	Containers containers(cubePositions, 10);
+	containers.instances.shininess = 32.0f;
 
 	unsigned int usedCamIdx = 0;
 	std::vector<Camera> cameras = { 
@@ -136,6 +138,9 @@ int main() {
 	models["BackBag"].instances.objects.emplace_back(Transformations{ {5.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
 	models["BackBag"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, 5.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.5f, 0.5f, 0.5f} });
 	models["Sponza"].instances.objects.emplace_back(Transformations{ {0.0f, 0.0f, -10.0f}, {1.0f, 1.0f, 1.0f, 0.0f}, {0.02f, 0.02f, 0.02f} });
+
+	models["BackBag"].instances.shininess = 12.0f;
+	models["Sponza"].instances.shininess = 64.0f;
 
 	std::vector<std::pair<std::string, std::vector<Transformations>&>> objects;
 	objects.push_back({ "Containers", containers.instances.objects});
@@ -150,6 +155,7 @@ int main() {
 		objects
 	);
 #pragma endregion
+
 	while (!glfwWindowShouldClose(window)) {
 #pragma region Time
 		time = static_cast<float>(glfwGetTime());
@@ -183,6 +189,7 @@ int main() {
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		shaders["lighting"].use();
+		shaders["lighting"].setBool("gamma", gamma);
 		shaders["lighting"].setVec3("viewPos", cameras[usedCamIdx].Position);
 
 		lightSys.update(shaders["lighting"]);

@@ -30,10 +30,6 @@ void LightingSystem::update(Shader& shader)
 		shader.setVec3(name + "diffuse", spotLight.diffuse);
 		shader.setVec3(name + "specular", spotLight.specular);
 
-		shader.setFloat(name + "constant", spotLight.constant);
-		shader.setFloat(name + "linear", spotLight.linear);
-		shader.setFloat(name + "quadratic", spotLight.quadratic);
-
 		shader.setFloat(name + "cutOff", spotLight.cutOff);
 		shader.setFloat(name + "outerCutOff", spotLight.outerCutOff);
 
@@ -48,9 +44,6 @@ void LightingSystem::update(Shader& shader)
 		shader.setVec3(name + "ambient", pointLight.ambient);
 		shader.setVec3(name + "diffuse", pointLight.diffuse);
 		shader.setVec3(name + "specular", pointLight.specular);
-		shader.setFloat(name + "constant", pointLight.constant);
-		shader.setFloat(name + "linear", pointLight.linear);
-		shader.setFloat(name + "quadratic", pointLight.quadratic);
 		shader.setVec3(name + "color", pointLight.color);
 
 		Shader& lightCube = shaders["lightCube"];
