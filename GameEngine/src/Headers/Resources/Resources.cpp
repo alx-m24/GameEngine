@@ -4,6 +4,7 @@ std::unordered_map<std::string, unsigned int> Resources::textures;
 std::unordered_map<std::string, Model> Resources::models;
 std::unordered_map<std::string, Shader> Resources::shaders;
 std::unordered_map<std::string, unsigned int> Resources::buffers;
+unsigned int Resources::ShadowMapResolution = 2048;
 const std::string Resources::PATH = std::filesystem::current_path().string() + "\\res";
 float Vertices::cube[] = {
 	// Position				// Normal				// TexCoords

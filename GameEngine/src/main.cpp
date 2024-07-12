@@ -59,6 +59,7 @@ int main() {
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 #pragma endregion
 
@@ -204,7 +205,7 @@ int main() {
 #pragma endregion
 
 #pragma region Draw
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #pragma region First Pass (depth map)
@@ -224,7 +225,7 @@ int main() {
 		shaders["depth"].use();
 		shaders["depth"].setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-		glViewport(0, 0, 1024, 1024);
+		glViewport(0, 0, ShadowMapResolution, ShadowMapResolution);
 		glBindFramebuffer(GL_FRAMEBUFFER, buffers["depthMapFBO"]);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
