@@ -28,7 +28,7 @@ void GUI::lighting()
         glm::vec3& specular = dirLight.specular;
         glm::vec3& color = dirLight.color;
 
-        ImGui::DragFloat3("Direction", &dir[0], 0.05f, -1.0f, 1.0f);
+        ImGui::DragFloat3("Direction", &dir[0], 0.001f, -1.0f, 1.0f);
         ImGui::ColorEdit3("Ambient", &ambient[0]);
         ImGui::ColorEdit3("Diffuse", &diffuse[0]);
         ImGui::ColorEdit3("Specular", &specular[0]);

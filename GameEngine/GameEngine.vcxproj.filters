@@ -80,9 +80,6 @@
     <ClInclude Include="src\Headers\Object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Headers\Buffers.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Headers\LightingSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -104,6 +101,9 @@
     <ClInclude Include="src\Headers\Resources\Resources.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Headers\Buffers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Shaders\lightCube.frag">
@@ -116,6 +116,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\Shaders\LightEnvironment.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Shaders\depthShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Shaders\depthShader.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
